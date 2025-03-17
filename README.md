@@ -1,6 +1,14 @@
 # Construction AI Backend
 
-This is the backend service for the Construction AI project, built using FastAPI and SQLite.
+This project is a FastAPI-based microservice that simulates an AI-powered construction task manager. Designed as a solution for a 24-hour coding challenge, it leverages the Gemini Pro Free Tier API to generate construction project tasks dynamically, stores project and task data in an SQLite database, and provides a RESTful API for managing construction projects. The service also includes a background process to simulate task completion, enhancing its functionality beyond the core requirements.
+
+Key features:
+
+- Accepts construction project requests (e.g., "Build a restaurant in San Francisco").
+- Uses Gemini API to generate a list of required tasks.
+- Stores and retrieves project data using SQLite and SQLAlchemy.
+- Exposes API endpoints for creating and retrieving projects.
+- Simulates task completion in the background using asyncio.
 
 ## Setup Instructions
 
@@ -65,12 +73,6 @@ curl -X POST "http://127.0.0.1:8000/projects/" \
 
 ```sh
 curl -X GET "http://127.0.0.1:8000/projects/1"
-```
-
-### Get All Projects
-
-```sh
-curl -X GET "http://127.0.0.1:8000/projects/"
 ```
 
 ### Run Tests
