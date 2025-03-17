@@ -12,7 +12,7 @@ from app.services import get_project_tasks
 
 router = APIRouter(prefix="/projects", tags=["Projects"])
 
-
+# Simulate background tasks using asyncio
 async def complete_tasks(project_id: int):
     await asyncio.sleep(10)
 
@@ -38,6 +38,7 @@ async def complete_tasks(project_id: int):
 )
 async def create_construction_request(project: ProjectCreateSchema, session: AsyncSession = Depends(get_session)):
     try:
+        # Adding new project to DB
         new_project = Projects(
             name=project.project_name, location=project.location, status="processing"
         )
@@ -45,19 +46,20 @@ async def create_construction_request(project: ProjectCreateSchema, session: Asy
         await session.commit()
         await session.refresh(new_project)
 
-
+        # Adding tasks to DB
         tasks_data = await get_project_tasks(project.project_name, project.location)
         tasks = [Tasks(project_id=new_project.id, name=t["name"], status=t["status"]) for t in tasks_data]
         session.add_all(tasks)
         await session.commit()
 
-        asyncio.create_task(complete_tasks(new_project.id))
+        # Creating background task
+        asyncio.create_task(complete_tasks(new_project.id))  # type: ignore
 
         return ProjectDetailsSchema(
-            id=new_project.id,
-            project_name=new_project.name,
-            location=new_project.location,
-            status=new_project.status,
+            id=new_project.id,  # type: ignore
+            project_name=new_project.name,  # type: ignore
+            location=new_project.location,  # type: ignore
+            status=new_project.status,  # type: ignore
             tasks=[TaskDetailsSchema(**t) for t in tasks_data],
         )
 
@@ -76,6 +78,7 @@ async def create_construction_request(project: ProjectCreateSchema, session: Asy
 )
 async def retrieve_project_details(project_id: int, session: AsyncSession = Depends(get_session)):
     try:
+        # Getting project from DB by ID
         result = await session.execute(select(Projects).where(Projects.id == project_id))
         project = result.scalars().first()
 
