@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_session
 from app.schemas import ProjectDetailsSchema, ProjectCreateSchema, TaskDetailsSchema
-from app.models import Projects, Tasks
+from app.models import Project, Task
 from app.services import get_project_tasks
 
 router = APIRouter(prefix="/projects", tags=["Projects"])
@@ -18,7 +18,7 @@ async def complete_tasks(project_id: int):
 
     async for session in get_session():
         try:
-            result = await session.execute(select(Tasks).where(Tasks.project_id == project_id))
+            result = await session.execute(select(Task).where(Task.project_id == project_id))
             tasks = result.scalars().all()
 
             for task in tasks:
@@ -39,7 +39,7 @@ async def complete_tasks(project_id: int):
 async def create_construction_request(project: ProjectCreateSchema, session: AsyncSession = Depends(get_session)):
     try:
         # Adding new project to DB
-        new_project = Projects(
+        new_project = Project(
             name=project.project_name, location=project.location, status="processing"
         )
         session.add(new_project)
@@ -48,7 +48,7 @@ async def create_construction_request(project: ProjectCreateSchema, session: Asy
 
         # Adding tasks to DB
         tasks_data = await get_project_tasks(project.project_name, project.location)
-        tasks = [Tasks(project_id=new_project.id, name=t["name"], status=t["status"]) for t in tasks_data]
+        tasks = [Task(project_id=new_project.id, name=t["name"], status=t["status"]) for t in tasks_data]
         session.add_all(tasks)
         await session.commit()
 
@@ -79,13 +79,13 @@ async def create_construction_request(project: ProjectCreateSchema, session: Asy
 async def retrieve_project_details(project_id: int, session: AsyncSession = Depends(get_session)):
     try:
         # Getting project from DB by ID
-        result = await session.execute(select(Projects).where(Projects.id == project_id))
+        result = await session.execute(select(Project).where(Project.id == project_id))
         project = result.scalars().first()
 
         if not project:
             raise HTTPException(status_code=404, detail="Project not found")
 
-        result = await session.execute(select(Tasks).where(Tasks.project_id == project_id))
+        result = await session.execute(select(Task).where(Task.project_id == project_id))
         tasks = result.scalars().all()
 
         return ProjectDetailsSchema(

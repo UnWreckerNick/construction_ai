@@ -7,7 +7,7 @@ from sqlalchemy.sql.functions import func
 class Model(DeclarativeBase):
    pass
 
-class Projects(Model):
+class Project(Model):
    __tablename__ = "projects"
    id: Mapped[int] = mapped_column(primary_key=True)
    name: Mapped[str]
@@ -15,7 +15,7 @@ class Projects(Model):
    status: Mapped[str]
    created_at: Mapped[datetime] = mapped_column(default=func.now())
 
-class Tasks(Model):
+class Task(Model):
    __tablename__ = "tasks"
    id: Mapped[int] = mapped_column(primary_key=True)
    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"), nullable=True)
